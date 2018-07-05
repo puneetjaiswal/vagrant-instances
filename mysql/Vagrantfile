@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "precise64"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.network :forwarded_port, guest: 3306, host: 3306
+  config.vm.provision :shell, :path => "install.sh"
+  config.vm.synced_folder ".", "/vagrant", :mount_options => ["dmode=777", "fmode=666"]
+  config.vm.network "private_network", ip: "10.10.10.1", type: "dhcp", auto_config: false
+
+ system('echo "
+rdr pass inet proto tcp from any to any port 3306 -> 127.0.0.1 port 3306
+" | sudo pfctl -ef - >/dev/null 2>&1; echo "Add Port Forwarding (3306 => 3306)"')
+
+end
